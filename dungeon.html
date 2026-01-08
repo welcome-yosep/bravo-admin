@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>던전 관리 - 게임 운영 관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* 사이드바 스타일 */
+        .sidebar {
+            width: 200px;
+            background: #e5e7eb;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 0;
+        }
+
+        .sidebar-item {
+            padding: 18px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #d1d5db;
+            user-select: none;
+        }
+
+        .sidebar-item:first-child {
+            background: #d1d5db;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .sidebar-item:not(:first-child):hover {
+            background: #d1d5db;
+            color: #1f2937;
+            transform: translateX(2px);
+        }
+
+        .sidebar-item:not(:first-child):active {
+            transform: translateX(0);
+            background: #c4c8cc;
+        }
+
+        .sidebar-sub-menu {
+            display: none;
+            background: #f3f4f6;
+        }
+
+        .sidebar-sub-menu.active {
+            display: block;
+        }
+
+        .sidebar-sub-item {
+            padding: 14px 0 14px 30px;
+            font-size: 14px;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #e5e7eb;
+            user-select: none;
+        }
+
+        .sidebar-sub-item:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+            padding-left: 35px;
+        }
+
+        .sidebar-sub-item:active {
+            background: #d1d5db;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            padding: 30px;
+        }
+
+        .glass-effect {
+            background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-active {
+            background: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="sidebar-item" onclick="location.href='index.html'" style="cursor: pointer;">Admin</div>
+        <div class="sidebar-item" onclick="location.href='account.html'">계정조회</div>
+        <div class="sidebar-item" onclick="toggleContentMenu()">콘텐츠 관리 <span id="contentArrow">▲</span></div>
+        <div class="sidebar-sub-menu active" id="contentSubMenu">
+            <div class="sidebar-sub-item" onclick="location.href='dungeon.html'">던전</div>
+            <div class="sidebar-sub-item" onclick="location.href='arena.html'">투기장</div>
+        </div>
+        <div class="sidebar-item" onclick="location.href='community.html'">커뮤니티</div>
+        <div class="sidebar-item" onclick="location.href='notice.html'">공지사항</div>
+        <div class="sidebar-item" onclick="location.href='mail.html'">메일</div>
+        <div class="sidebar-item" onclick="toggleServiceMenu()">서비스관리 <span id="serviceArrow">▼</span></div>
+        <div class="sidebar-sub-menu" id="serviceSubMenu">
+            <div class="sidebar-sub-item" onclick="location.href='server.html'">서버 관리</div>
+            <div class="sidebar-sub-item" onclick="location.href='sanction.html'">제재 관리</div>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">콘텐츠 관리</h1>
+            <p class="text-gray-600 mt-2">콘텐츠 관리 / 던전</p>
+        </div>
+
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <div class="tab-container flex gap-2 mb-6 pb-4 border-b border-gray-200">
+                <button class="tab-active px-5 py-2.5 rounded-lg font-semibold transition-all duration-200">
+                    던전
+                </button>
+                <button onclick="location.href='arena.html'" class="bg-gray-100 px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 text-gray-700 hover:bg-gray-200">
+                    투기장
+                </button>
+            </div>
+
+            <div class="text-center py-20">
+                <div class="text-gray-500 text-lg mb-4">🚧 개발 중인 기능입니다</div>
+                <div class="text-gray-400 text-sm">던전 관리 기능은 준비 중입니다.</div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        // 콘텐츠 관리 메뉴 토글
+        function toggleContentMenu() {
+            const subMenu = document.getElementById('contentSubMenu');
+            const arrow = document.getElementById('contentArrow');
+
+            if (subMenu.classList.contains('active')) {
+                subMenu.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                subMenu.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+
+        // 서비스 관리 메뉴 토글
+        function toggleServiceMenu() {
+            const subMenu = document.getElementById('serviceSubMenu');
+            const arrow = document.getElementById('serviceArrow');
+
+            if (subMenu.classList.contains('active')) {
+                subMenu.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                subMenu.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+    </script>
+</body>
+</html>
