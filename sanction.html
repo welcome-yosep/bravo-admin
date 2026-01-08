@@ -16,26 +16,81 @@
         body {
             background: #f5f7fa;
             min-height: 100vh;
+            margin: 0;
         }
 
-        .back-to-main {
+        /* 사이드바 스타일 */
+        .sidebar {
+            width: 200px;
+            background: #e5e7eb;
+            min-height: 100vh;
             position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #3b82f6;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
+            left: 0;
+            top: 0;
+            padding: 0;
+        }
+
+        .sidebar-item {
+            padding: 18px 0;
+            text-align: center;
             font-weight: 600;
+            font-size: 16px;
+            color: #374151;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-            z-index: 1000;
+            border-bottom: 1px solid #d1d5db;
+            user-select: none;
         }
-        .back-to-main:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+
+        .sidebar-item:first-child {
+            background: #d1d5db;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .sidebar-item:not(:first-child):hover {
+            background: #d1d5db;
+            color: #1f2937;
+            transform: translateX(2px);
+        }
+
+        .sidebar-item:not(:first-child):active {
+            transform: translateX(0);
+            background: #c4c8cc;
+        }
+
+        .sidebar-sub-menu {
+            display: none;
+            background: #f3f4f6;
+        }
+
+        .sidebar-sub-menu.active {
+            display: block;
+        }
+
+        .sidebar-sub-item {
+            padding: 14px 0 14px 30px;
+            font-size: 14px;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #e5e7eb;
+            user-select: none;
+        }
+
+        .sidebar-sub-item:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+            padding-left: 35px;
+        }
+
+        .sidebar-sub-item:active {
+            background: #d1d5db;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            padding: 30px;
         }
 
         .glass-effect {
@@ -171,12 +226,29 @@
         }
     </style>
 </head>
-<body class="p-6">
-    <button onclick="location.href='index.html'" class="back-to-main">
-        ← 메인으로
-    </button>
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="sidebar-item" onclick="location.href='index.html'" style="cursor: pointer;">Admin</div>
+        <div class="sidebar-item" onclick="location.href='account.html'">계정조회</div>
+        <div class="sidebar-item" onclick="toggleContentMenu()">콘텐츠 관리 <span id="contentArrow">▼</span></div>
+        <div class="sidebar-sub-menu" id="contentSubMenu">
+            <div class="sidebar-sub-item" onclick="location.href='dungeon.html'">던전</div>
+            <div class="sidebar-sub-item" onclick="location.href='arena.html'">투기장</div>
+        </div>
+        <div class="sidebar-item" onclick="location.href='community.html'">커뮤니티</div>
+        <div class="sidebar-item" onclick="location.href='notice.html'">공지사항</div>
+        <div class="sidebar-item" onclick="location.href='mail.html'">메일</div>
+        <div class="sidebar-item" onclick="toggleServiceMenu()">서비스관리 <span id="serviceArrow">▲</span></div>
+        <div class="sidebar-sub-menu active" id="serviceSubMenu">
+            <div class="sidebar-sub-item" onclick="location.href='server.html'">서버 관리</div>
+            <div class="sidebar-sub-item" onclick="location.href='sanction.html'">제재 관리</div>
+        </div>
+    </div>
 
-    <div class="max-w-7xl mx-auto" style="margin-top: 60px;">
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+    <div class="max-w-7xl mx-auto">
         <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-800">서비스 관리</h1>
             <p class="text-gray-600 mt-2">서버 관리 / 제재 관리</p>
@@ -301,6 +373,34 @@
 
         // 초기 렌더링
         renderSanctions();
+
+        // 콘텐츠 관리 메뉴 토글
+        function toggleContentMenu() {
+            const subMenu = document.getElementById('contentSubMenu');
+            const arrow = document.getElementById('contentArrow');
+
+            if (subMenu.classList.contains('active')) {
+                subMenu.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                subMenu.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+
+        // 서비스 관리 메뉴 토글
+        function toggleServiceMenu() {
+            const subMenu = document.getElementById('serviceSubMenu');
+            const arrow = document.getElementById('serviceArrow');
+
+            if (subMenu.classList.contains('active')) {
+                subMenu.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                subMenu.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
     </script>
 </body>
 </html>

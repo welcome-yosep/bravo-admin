@@ -39,6 +39,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             border-bottom: 1px solid #d1d5db;
+            user-select: none;
         }
 
         .sidebar-item:first-child {
@@ -49,6 +50,13 @@
 
         .sidebar-item:not(:first-child):hover {
             background: #d1d5db;
+            color: #1f2937;
+            transform: translateX(2px);
+        }
+
+        .sidebar-item:not(:first-child):active {
+            transform: translateX(0);
+            background: #c4c8cc;
         }
 
         .sidebar-sub-menu {
@@ -67,11 +75,17 @@
             cursor: pointer;
             transition: all 0.2s ease;
             border-bottom: 1px solid #e5e7eb;
+            user-select: none;
         }
 
         .sidebar-sub-item:hover {
             background: #e5e7eb;
             color: #1f2937;
+            padding-left: 35px;
+        }
+
+        .sidebar-sub-item:active {
+            background: #d1d5db;
         }
 
         .main-content {
@@ -218,7 +232,7 @@
 <body>
     <!-- 사이드바 -->
     <div class="sidebar">
-        <div class="sidebar-item">Admin</div>
+        <div class="sidebar-item" onclick="location.href='index.html'" style="cursor: pointer;">Admin</div>
         <div class="sidebar-item" onclick="location.href='account.html'">계정조회</div>
         <div class="sidebar-item" onclick="toggleContentMenu()">콘텐츠 관리 <span id="contentArrow">▼</span></div>
         <div class="sidebar-sub-menu" id="contentSubMenu">
@@ -341,11 +355,21 @@
                     <div class="server-info">동접: 36,750명</div>
                     <div class="server-info">가동률: 95%</div>
                 </div>
-            </div>
-
-            <!-- 프로그레스 바 -->
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: 68%;"></div>
+                <div class="server-card">
+                    <div class="server-name">서버 7</div>
+                    <div class="server-info">동접: 43,890명</div>
+                    <div class="server-info">가동률: 97%</div>
+                </div>
+                <div class="server-card">
+                    <div class="server-name">서버 8</div>
+                    <div class="server-info">동접: 47,650명</div>
+                    <div class="server-info">가동률: 99%</div>
+                </div>
+                <div class="server-card">
+                    <div class="server-name">서버 9</div>
+                    <div class="server-info">동접: 39,210명</div>
+                    <div class="server-info">가동률: 96%</div>
+                </div>
             </div>
         </div>
     </div>
