@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커뮤니티 관리 - 게임 운영 관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* 사이드바 스타일 */
+        .sidebar {
+            width: 200px;
+            background: #e5e7eb;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 0;
+        }
+
+        .sidebar-item {
+            padding: 18px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #d1d5db;
+            user-select: none;
+        }
+
+        .sidebar-item:first-child {
+            background: #d1d5db;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .sidebar-item:not(:first-child):hover {
+            background: #d1d5db;
+            color: #1f2937;
+            transform: translateX(2px);
+        }
+
+        .sidebar-item:not(:first-child):active {
+            transform: translateX(0);
+            background: #c4c8cc;
+        }
+
+        .sidebar-sub-menu {
+            display: none;
+            background: #f3f4f6;
+        }
+
+        .sidebar-sub-menu.active {
+            display: block;
+        }
+
+        .sidebar-sub-item {
+            padding: 14px 0 14px 30px;
+            font-size: 14px;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #e5e7eb;
+            user-select: none;
+        }
+
+        .sidebar-sub-item:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+            padding-left: 35px;
+        }
+
+        .sidebar-sub-item:active {
+            background: #d1d5db;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            padding: 30px;
+        }
+
+        .glass-effect {
+            background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 섹션 헤더 */
+        .section-header {
+            background: #374151;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .section-content {
+            background: white;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* 검색 폼 */
+        .search-grid {
+            display: grid;
+            grid-template-columns: auto 200px auto 200px 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        input[type="text"], select {
+            padding: 10px 14px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-search {
+            background: #374151;
+            color: white;
+            padding: 10px 32px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn-search:hover {
+            background: #1f2937;
+        }
+
+        /* 탭 스타일 */
+        .tab-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* 테이블 */
+        .community-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .community-table thead {
+            background: #374151;
+        }
+
+        .community-table thead th {
+            color: white;
+            padding: 14px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            border-right: 1px solid #4b5563;
+        }
+
+        .community-table thead th:last-child {
+            border-right: none;
+        }
+
+        .community-table tbody td {
+            padding: 40px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .empty-message {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="sidebar-item" onclick="location.href='index.html'" style="cursor: pointer;">Admin</div>
+        <div class="sidebar-item" onclick="location.href='account.html'">계정조회</div>
+        <div class="sidebar-item" onclick="toggleContentMenu()">콘텐츠 관리 <span id="contentArrow">▼</span></div>
+        <div class="sidebar-sub-menu" id="contentSubMenu">
+            <div class="sidebar-sub-item" onclick="location.href='dungeon.html'">던전</div>
+            <div class="sidebar-sub-item" onclick="location.href='arena.html'">투기장</div>
+        </div>
+        <div class="sidebar-item" onclick="location.href='community.html'">커뮤니티</div>
+        <div class="sidebar-item" onclick="location.href='notice.html'">공지사항</div>
+        <div class="sidebar-item" onclick="location.href='mail.html'">메일</div>
+        <div class="sidebar-item" onclick="toggleServiceMenu()">서비스관리 <span id="serviceArrow">▼</span></div>
+        <div class="sidebar-sub-menu" id="serviceSubMenu">
+            <div class="sidebar-sub-item" onclick="location.href='server.html'">서버 관리</div>
+            <div class="sidebar-sub-item" onclick="location.href='sanction.html'">제재 관리</div>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">커뮤니티 관리</h1>
+            <p class="text-gray-600 mt-2">커뮤니티</p>
+        </div>
+
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <!-- 탭 -->
+            <div class="tab-container flex gap-2 mb-6 pb-4 border-b border-gray-200">
+                <button id="guildTab" class="tab-active px-5 py-2.5 rounded-lg font-semibold transition-all duration-200" onclick="switchTab('guild')">
+                    길드
+                </button>
+                <button id="partyTab" class="bg-gray-100 px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 text-gray-700 hover:bg-gray-200" onclick="switchTab('party')">
+                    파티
+                </button>
+                <button id="friendTab" class="bg-gray-100 px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 text-gray-700 hover:bg-gray-200" onclick="switchTab('friend')">
+                    친구
+                </button>
+            </div>
+
+            <!-- 검색 조건 -->
+            <div class="mb-6">
+                <div class="section-header">검색 조건</div>
+                <div class="section-content">
+                    <div class="search-grid">
+                        <div class="form-label">조회 기준</div>
+                        <select id="searchCriteria1">
+                            <option value="id">ID</option>
+                            <option value="account">account</option>
+                            <option value="name">name</option>
+                        </select>
+
+                        <div class="form-label">조회 기준</div>
+                        <select id="searchCriteria2">
+                            <option value="guild">길드</option>
+                            <option value="party">파티</option>
+                            <option value="friend">친구</option>
+                        </select>
+
+                        <input type="text" placeholder="검색어를 입력하세요" id="searchKeyword" style="flex: 1;">
+                        <button class="btn-search" onclick="searchCommunity()">검색</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 조회 결과 -->
+            <div>
+                <div class="section-header">
+                    <span id="resultTitle">길드 목록</span>
+                </div>
+                <div class="section-content" style="padding: 0;">
+                    <table class="community-table">
+                        <thead id="tableHeader">
+                            <!-- JavaScript로 동적 생성 -->
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="10" class="empty-message">검색 조건을 입력하고 검색 버튼을 클릭하세요.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        let currentTab = 'guild';
+
+        const tableHeaders = {
+            guild: ['길드 ID', '길드명', '길드 마스터', '멤버 수', '레벨', '생성일', '상태'],
+            party: ['파티 ID', '파티명', '파티장', '멤버 수', '생성일', '상태'],
+            friend: ['친구 관계 ID', '캐릭터 1', '캐릭터 2', '친구 등록일', '상태']
+        };
+
+        const sampleData = {
+            guild: [
+                { id: 'G001', name: '최강길드', master: '루피', members: 50, level: 10, created: '2025-01-01', status: '활성' },
+                { id: 'G002', name: '전설의용사들', master: '조로', members: 45, level: 9, created: '2025-01-02', status: '활성' }
+            ],
+            party: [
+                { id: 'P001', name: '던전탐험대', leader: '상디', members: 5, created: '2025-01-08 10:30', status: '진행중' },
+                { id: 'P002', name: '레이드팀', leader: '나미', members: 8, created: '2025-01-08 11:00', status: '진행중' }
+            ],
+            friend: [
+                { id: 'F001', char1: '루피', char2: '조로', created: '2025-01-01', status: '친구' },
+                { id: 'F002', char1: '상디', char2: '나미', created: '2025-01-02', status: '친구' }
+            ]
+        };
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // 탭 스타일 변경
+            document.querySelectorAll('.tab-container button').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+            });
+
+            const activeTab = document.getElementById(tab + 'Tab');
+            activeTab.classList.add('tab-active');
+            activeTab.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+
+            // 제목 변경
+            const titles = {
+                guild: '길드 목록',
+                party: '파티 목록',
+                friend: '친구 목록'
+            };
+            document.getElementById('resultTitle').textContent = titles[tab];
+
+            // 조회 기준 2번째 선택박스 업데이트
+            const criteria2 = document.getElementById('searchCriteria2');
+            criteria2.innerHTML = '';
+            if (tab === 'guild') {
+                criteria2.innerHTML = '<option value="guild">길드</option>';
+            } else if (tab === 'party') {
+                criteria2.innerHTML = '<option value="party">파티</option>';
+            } else if (tab === 'friend') {
+                criteria2.innerHTML = '<option value="friend">친구</option>';
+            }
+
+            // 테이블 초기화
+            renderTable();
+        }
+
+        function renderTable() {
+            const headerRow = document.getElementById('tableHeader');
+            const tbody = document.getElementById('tableBody');
+
+            // 헤더 생성
+            headerRow.innerHTML = '<tr>' + tableHeaders[currentTab].map(h => `<th>${h}</th>`).join('') + '</tr>';
+
+            // 빈 상태로 초기화
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="${tableHeaders[currentTab].length}" class="empty-message">검색 조건을 입력하고 검색 버튼을 클릭하세요.</td>
+                </tr>
+            `;
+        }
+
+        function searchCommunity() {
+            const criteria1 = document.getElementById('searchCriteria1').value;
+            const criteria2 = document.getElementById('searchCriteria2').value;
+            const keyword = document.getElementById('searchKeyword').value;
+
+            if (!keyword.trim()) {
+                alert('검색어를 입력하세요.');
+                return;
+            }
+
+            const tbody = document.getElementById('tableBody');
+            const data = sampleData[currentTab];
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="${tableHeaders[currentTab].length}" class="empty-message">검색 결과가 없습니다.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // 데이터 렌더링
+            if (currentTab === 'guild') {
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.master}</td>
+                        <td>${item.members}</td>
+                        <td>${item.level}</td>
+                        <td>${item.created}</td>
+                        <td><span class="badge badge-green">${item.status}</span></td>
+                    </tr>
+                `).join('');
+            } else if (currentTab === 'party') {
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.leader}</td>
+                        <td>${item.members}</td>
+                        <td>${item.created}</td>
+                        <td><span class="badge badge-blue">${item.status}</span></td>
+                    </tr>
+                `).join('');
+            } else if (currentTab === 'friend') {
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.char1}</td>
+                        <td>${item.char2}</td>
+                        <td>${item.created}</td>
+                        <td><span class="badge badge-green">${item.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // 초기 렌더링
+        renderTable();
+
+        // 콘텐츠 관리 메뉴 토글
+        function toggleContentMenu() {
+            const subMenu = document.getElementById('contentSubMenu');
+            const arrow = document.getElementById('contentArrow');
+
+            if (subMenu.classList.contains('active')) {
+                subMenu.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                subMenu.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+
+        // 서비스 관리 메뉴 토글
+        function toggleServiceMenu() {
+            const subMenu = document.getElementById('serviceSubMenu');
+            const arrow = document.getElementById('serviceArrow');
+
+            if (subMenu.classList.contains('active')) {
+                subMenu.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                subMenu.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+    </script>
+</body>
+</html>
