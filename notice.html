@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항 관리 - 게임 운영 관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .back-to-main {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            z-index: 1000;
+        }
+        .back-to-main:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .glass-effect {
+            background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 섹션 헤더 */
+        .section-header {
+            background: #0891b2;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-content {
+            background: white;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* 버튼 */
+        .btn-instant {
+            background: #ef4444;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn-instant:hover {
+            background: #dc2626;
+        }
+
+        .btn-schedule {
+            background: #10b981;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .btn-schedule:hover {
+            background: #059669;
+        }
+
+        /* 테이블 */
+        .notice-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .notice-table thead {
+            background: #374151;
+        }
+
+        .notice-table thead th {
+            color: white;
+            padding: 14px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            border-right: 1px solid #4b5563;
+        }
+
+        .notice-table thead th:last-child {
+            border-right: none;
+        }
+
+        .notice-table tbody td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .notice-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        /* 상태 배지 */
+        .badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-scheduled {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-instant {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .empty-message {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* 버튼 그룹 */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <button onclick="location.href='index.html'" class="back-to-main">
+        ← 메인으로
+    </button>
+
+    <div class="max-w-7xl mx-auto" style="margin-top: 60px;">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">공지사항 관리</h1>
+            <p class="text-gray-600 mt-2">공지사항</p>
+        </div>
+
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <!-- 스케줄 공지 목록 -->
+            <div class="mb-6">
+                <div class="section-header">
+                    <span>스케줄 공지 목록</span>
+                    <div class="btn-group">
+                        <button class="btn-instant" onclick="createInstantNotice()">즉시 공지</button>
+                        <button class="btn-schedule" onclick="createScheduleNotice()">스케줄 생성</button>
+                    </div>
+                </div>
+                <div class="section-content" style="padding: 0;">
+                    <table class="notice-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>제목</th>
+                                <th>내용</th>
+                                <th>시작 시간</th>
+                                <th>종료 시간</th>
+                                <th>상태</th>
+                                <th>생성일</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody">
+                            <!-- JavaScript로 동적 생성 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 즉시 공지 목록 -->
+            <div>
+                <div class="section-header">
+                    <span>즉시 공지 목록</span>
+                </div>
+                <div class="section-content" style="padding: 0;">
+                    <table class="notice-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>제목</th>
+                                <th>내용</th>
+                                <th>발송 시간</th>
+                                <th>타겟</th>
+                                <th>생성자</th>
+                            </tr>
+                        </thead>
+                        <tbody id="instantTableBody">
+                            <!-- JavaScript로 동적 생성 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 스케줄 공지 데이터 (예시)
+        const scheduleNotices = [
+            {
+                id: 'SCH001',
+                title: '정기 점검 안내',
+                content: '2025년 1월 15일 정기 점검이 진행됩니다.',
+                startTime: '2025-01-15 02:00',
+                endTime: '2025-01-15 06:00',
+                status: 'active',
+                created: '2025-01-08 10:00'
+            },
+            {
+                id: 'SCH002',
+                title: '신규 콘텐츠 업데이트',
+                content: '새로운 던전이 추가됩니다.',
+                startTime: '2025-01-20 10:00',
+                endTime: '2025-01-25 10:00',
+                status: 'scheduled',
+                created: '2025-01-08 11:00'
+            },
+            {
+                id: 'SCH003',
+                title: '이벤트 종료 안내',
+                content: '겨울 이벤트가 곧 종료됩니다.',
+                startTime: '2025-01-05 00:00',
+                endTime: '2025-01-08 23:59',
+                status: 'inactive',
+                created: '2025-01-05 09:00'
+            }
+        ];
+
+        // 즉시 공지 데이터 (예시)
+        const instantNotices = [
+            {
+                id: 'INS001',
+                title: '긴급 서버 점검',
+                content: '서버 긴급 점검이 진행됩니다.',
+                sentTime: '2025-01-08 14:30',
+                target: '전체 유저',
+                creator: 'GM_Admin01'
+            },
+            {
+                id: 'INS002',
+                title: '보상 지급 완료',
+                content: '이벤트 보상이 지급되었습니다.',
+                sentTime: '2025-01-08 12:00',
+                target: '이벤트 참가자',
+                creator: 'GM_Admin02'
+            },
+            {
+                id: 'INS003',
+                title: '버그 수정 안내',
+                content: '일부 버그가 수정되었습니다.',
+                sentTime: '2025-01-07 18:00',
+                target: '전체 유저',
+                creator: 'GM_Admin01'
+            }
+        ];
+
+        function renderScheduleNotices() {
+            const tbody = document.getElementById('scheduleTableBody');
+
+            if (scheduleNotices.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-message">스케줄 공지가 없습니다.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = scheduleNotices.map(notice => {
+                let statusBadge = '';
+                let statusText = '';
+
+                if (notice.status === 'active') {
+                    statusBadge = 'badge-active';
+                    statusText = '활성화';
+                } else if (notice.status === 'scheduled') {
+                    statusBadge = 'badge-scheduled';
+                    statusText = '예정';
+                } else if (notice.status === 'inactive') {
+                    statusBadge = 'badge-inactive';
+                    statusText = '비활성화';
+                }
+
+                return `
+                    <tr>
+                        <td>${notice.id}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${notice.title}</td>
+                        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${notice.content}</td>
+                        <td>${notice.startTime}</td>
+                        <td>${notice.endTime}</td>
+                        <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                        <td>${notice.created}</td>
+                        <td>
+                            <button onclick="editNotice('${notice.id}')" style="background: #3b82f6; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; margin-right: 4px;">수정</button>
+                            <button onclick="deleteNotice('${notice.id}')" style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px;">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderInstantNotices() {
+            const tbody = document.getElementById('instantTableBody');
+
+            if (instantNotices.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-message">즉시 공지 내역이 없습니다.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = instantNotices.map(notice => `
+                <tr>
+                    <td>${notice.id}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${notice.title}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${notice.content}</td>
+                    <td>${notice.sentTime}</td>
+                    <td><span class="badge badge-instant">${notice.target}</span></td>
+                    <td>${notice.creator}</td>
+                </tr>
+            `).join('');
+        }
+
+        function createInstantNotice() {
+            alert('즉시 공지 생성 기능은 준비 중입니다.\n\n모달 또는 새 페이지에서 다음 정보를 입력받습니다:\n- 제목\n- 내용\n- 타겟 (전체 유저, 특정 그룹 등)');
+        }
+
+        function createScheduleNotice() {
+            alert('스케줄 공지 생성 기능은 준비 중입니다.\n\n모달 또는 새 페이지에서 다음 정보를 입력받습니다:\n- 제목\n- 내용\n- 시작 시간\n- 종료 시간');
+        }
+
+        function editNotice(id) {
+            alert(`공지 ${id} 수정 기능은 준비 중입니다.`);
+        }
+
+        function deleteNotice(id) {
+            if (confirm(`공지 ${id}를 삭제하시겠습니까?`)) {
+                alert('삭제되었습니다.');
+                // 실제로는 서버에 삭제 요청 후 목록 갱신
+            }
+        }
+
+        // 초기 렌더링
+        renderScheduleNotices();
+        renderInstantNotices();
+    </script>
+</body>
+</html>

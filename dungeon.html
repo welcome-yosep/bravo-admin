@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>던전 관리 - 게임 운영 관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .back-to-main {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            z-index: 1000;
+        }
+        .back-to-main:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .glass-effect {
+            background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-active {
+            background: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <button onclick="location.href='index.html'" class="back-to-main">
+        ← 메인으로
+    </button>
+
+    <div class="max-w-7xl mx-auto" style="margin-top: 60px;">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">콘텐츠 관리</h1>
+            <p class="text-gray-600 mt-2">콘텐츠 관리 / 던전</p>
+        </div>
+
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <div class="tab-container flex gap-2 mb-6 pb-4 border-b border-gray-200">
+                <button class="tab-active px-5 py-2.5 rounded-lg font-semibold transition-all duration-200">
+                    던전
+                </button>
+                <button onclick="location.href='arena.html'" class="bg-gray-100 px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 text-gray-700 hover:bg-gray-200">
+                    투기장
+                </button>
+            </div>
+
+            <div class="text-center py-20">
+                <div class="text-gray-500 text-lg mb-4">🚧 개발 중인 기능입니다</div>
+                <div class="text-gray-400 text-sm">던전 관리 기능은 준비 중입니다.</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

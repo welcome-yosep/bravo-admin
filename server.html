@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서버 관리 - 게임 운영 관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* 메인으로 돌아가기 버튼 */
+        .back-to-main {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            z-index: 1000;
+        }
+        .back-to-main:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .glass-effect {
+            background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* 탭 스타일 */
+        .tab-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* 테이블 스타일 */
+        .server-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .server-table thead {
+            background: #374151;
+        }
+
+        .server-table thead th {
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-right: 1px solid #4b5563;
+            font-size: 14px;
+        }
+
+        .server-table thead th:first-child {
+            width: 40px;
+            text-align: center;
+        }
+
+        .server-table thead th:last-child {
+            border-right: none;
+        }
+
+        .server-table tbody td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .server-table tbody td:first-child {
+            text-align: center;
+        }
+
+        .server-table tbody tr {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .server-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .server-table tbody tr.expanded {
+            background: #eff6ff;
+        }
+
+        /* 확장 상세 정보 */
+        .detail-row {
+            background: #f8fafc;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #dbeafe;
+            border-radius: 6px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #1e40af;
+            min-width: 180px;
+        }
+
+        .detail-value {
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        /* 버튼 스타일 */
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        /* 상태 배지 */
+        .badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-normal {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-offline {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* 입력 필드 */
+        input[type="text"], input[type="number"], select {
+            padding: 8px 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .expand-icon {
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="p-6">
+    <!-- 메인으로 돌아가기 버튼 -->
+    <button onclick="location.href='index.html'" class="back-to-main">
+        ← 메인으로
+    </button>
+
+    <div class="max-w-7xl mx-auto" style="margin-top: 60px;">
+        <!-- 헤더 -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">서비스 관리</h1>
+            <p class="text-gray-600 mt-2">서버 관리 / 서버 관리</p>
+        </div>
+
+        <!-- 탭 -->
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <div class="tab-container flex gap-2 mb-6 pb-4 border-b border-gray-200">
+                <button class="tab-active px-5 py-2.5 rounded-lg font-semibold transition-all duration-200">
+                    서버 관리
+                </button>
+                <button onclick="location.href='sanction.html'" class="bg-gray-100 px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 text-gray-700 hover:bg-gray-200">
+                    제재 관리
+                </button>
+            </div>
+
+            <!-- 검색 선택 -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2">권역 선택</label>
+                <select id="regionSelect" class="w-64" onchange="filterServers()">
+                    <option value="AA2-Dev">AA2-Dev</option>
+                    <option value="AA2-QA">AA2-QA</option>
+                    <option value="AA2-Live">AA2-Live</option>
+                </select>
+            </div>
+
+            <!-- 월드 목록 테이블 -->
+            <div class="overflow-x-auto">
+                <table class="server-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Id</th>
+                            <th>Display Name</th>
+                            <th>Version</th>
+                            <th>State</th>
+                            <th>User Count</th>
+                            <th>Max User</th>
+                            <th>Character Creation Enabled</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serverTableBody">
+                        <!-- JavaScript로 동적 생성 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const servers = [
+            { id: 230, displayName: 'burp', version: '04ef2d1c785b', state: 'Normal', userCount: 0, maxUser: 2000, characterCreationEnabled: false, name: 'XL0153-P1', regionName: 'AA2-Dev', advertiseAddress: '192.168.114.75:38090', restAdvertiseAddress: 'http://192.168.114.75:38092' },
+            { id: 229, displayName: 'jinwony11', version: 'dev-26.1.8.214', state: 'Normal', userCount: 1, maxUser: 2000, characterCreationEnabled: false, name: 'XL0152-P1', regionName: 'AA2-Dev', advertiseAddress: '192.168.114.75:38080', restAdvertiseAddress: 'http://192.168.114.75:38082' },
+            { id: 228, displayName: 'kdi3057', version: 'dev-26.1.6.1508', state: 'Normal', userCount: 0, maxUser: 2000, characterCreationEnabled: false, name: 'XL0151-P1', regionName: 'AA2-Dev', advertiseAddress: '192.168.114.75:38070', restAdvertiseAddress: 'http://192.168.114.75:38072' },
+            { id: 227, displayName: 'x5build', version: '', state: 'Offline', userCount: 0, maxUser: 2000, characterCreationEnabled: false, name: 'XL0150-P1', regionName: 'AA2-Dev', advertiseAddress: '192.168.114.75:38060', restAdvertiseAddress: 'http://192.168.114.75:38062' },
+            { id: 225, displayName: 'root', version: '', state: 'Offline', userCount: 0, maxUser: 2000, characterCreationEnabled: false, name: 'XL0148-P1', regionName: 'AA2-Dev', advertiseAddress: '192.168.114.75:38040', restAdvertiseAddress: 'http://192.168.114.75:38042' },
+            { id: 222, displayName: 'root', version: '', state: 'Offline', userCount: 0, maxUser: 2000, characterCreationEnabled: false, name: 'XL0145-P1', regionName: 'AA2-Dev', advertiseAddress: '192.168.114.75:38010', restAdvertiseAddress: 'http://192.168.114.75:38012' }
+        ];
+
+        let expandedRow = null;
+
+        function renderServers() {
+            const tbody = document.getElementById('serverTableBody');
+            const region = document.getElementById('regionSelect').value;
+
+            tbody.innerHTML = servers.map((server, index) => `
+                <tr onclick="toggleDetail(${index})" id="row-${index}" class="${expandedRow === index ? 'expanded' : ''}">
+                    <td><span class="expand-icon ${expandedRow === index ? 'expanded' : ''}" id="icon-${index}">▶</span></td>
+                    <td>${server.id}</td>
+                    <td>${server.displayName}</td>
+                    <td>${server.version}</td>
+                    <td><span class="badge ${server.state === 'Normal' ? 'badge-normal' : 'badge-offline'}">${server.state}</span></td>
+                    <td>${server.userCount}</td>
+                    <td>${server.maxUser}</td>
+                    <td>${server.characterCreationEnabled}</td>
+                </tr>
+                ${expandedRow === index ? `
+                <tr class="detail-row">
+                    <td colspan="8">
+                        <div class="detail-grid">
+                            <div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">Id</span>
+                                    <span class="detail-value">${server.id}</span>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">DisplayName</span>
+                                    <span class="detail-value">${server.displayName}</span>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">Version</span>
+                                    <span class="detail-value">${server.version}</span>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">RestAdvertiseAddress</span>
+                                    <span class="detail-value">${server.restAdvertiseAddress}</span>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">State</span>
+                                    <select class="ml-2">
+                                        <option ${server.state === 'Normal' ? 'selected' : ''}>Normal</option>
+                                        <option ${server.state === 'Offline' ? 'selected' : ''}>Offline</option>
+                                    </select>
+                                    <button class="btn-primary ml-2">저장</button>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Max User</span>
+                                    <input type="number" value="${server.maxUser}" class="ml-2 w-32">
+                                    <button class="btn-primary ml-2">저장</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">Name</span>
+                                    <span class="detail-value">${server.name}</span>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">RegionName</span>
+                                    <span class="detail-value">${server.regionName}</span>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">AdvertiseAddress</span>
+                                    <span class="detail-value">${server.advertiseAddress}</span>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <span class="detail-label">User Count</span>
+                                    <span class="detail-value">${server.userCount}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Character Creation Enabled</span>
+                                    <label class="ml-2">
+                                        <input type="radio" name="char-create-${index}" value="true" ${server.characterCreationEnabled ? 'checked' : ''}> true
+                                    </label>
+                                    <label class="ml-2">
+                                        <input type="radio" name="char-create-${index}" value="false" ${!server.characterCreationEnabled ? 'checked' : ''}> false
+                                    </label>
+                                    <button class="btn-primary ml-2">저장</button>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                ` : ''}
+            `).join('');
+        }
+
+        function toggleDetail(index) {
+            if (expandedRow === index) {
+                expandedRow = null;
+            } else {
+                expandedRow = index;
+            }
+            renderServers();
+        }
+
+        function filterServers() {
+            renderServers();
+        }
+
+        // 초기 렌더링
+        renderServers();
+    </script>
+</body>
+</html>
