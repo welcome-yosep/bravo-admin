@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 운영 관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* 부드러운 전환 효과 */
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 페이드인 애니메이션 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .slide-in {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
+
+        .pulse-active {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .glass-effect {
+            background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        label {
+            color: #1f2937 !important;
+            font-weight: 700 !important;
+        }
+        .selected-row {
+            background: #eff6ff;
+            border-left: 3px solid #3b82f6;
+        }
+        tr:not(.selected-row):hover {
+            background: #f8fafc;
+        }
+        .tab-active {
+            background: #3b82f6;
+            color: white;
+        }
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .stat-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .delete-btn {
+            background: #ef4444;
+        }
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+        .edit-btn {
+            background: #3b82f6;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .edit-btn:hover {
+            background: #2563eb;
+        }
+        input[type="checkbox"]:checked {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        select, input[type="text"] {
+            background: white !important;
+            border: 2px solid #374151 !important;
+            color: #1f2937 !important;
+        }
+        select:focus, input[type="text"]:focus {
+            background: white !important;
+            outline: none;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        select option {
+            background: white;
+            color: #1f2937 !important;
+            padding: 10px;
+            font-weight: 500;
+        }
+        select option:hover {
+            background: #f3f4f6;
+        }
+        select option:checked {
+            background: #3b82f6;
+            color: white !important;
+        }
+        select {
+            cursor: pointer;
+        }
+        input::placeholder {
+            color: #1f2937 !important;
+            opacity: 0.6;
+        }
+        .item-row {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        .item-row:hover {
+            background: #f3f4f6;
+        }
+        .item-row.equipped {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+        .item-row.equipped:hover {
+            background: #dbeafe;
+        }
+        .skill-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .skill-node.unlocked {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: 2px solid #2563eb;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        .skill-node.locked {
+            background: #f3f4f6;
+            border: 2px solid #d1d5db;
+        }
+        .skill-node.ultimate {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+        .skill-node.ultimate.unlocked {
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            border: 3px solid #7c3aed;
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .skill-node:hover {
+            transform: scale(1.08) translateY(-2px);
+        }
+        .skill-node.unlocked:hover {
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5), 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+        .skill-line {
+            width: 3px;
+            height: 40px;
+            background: linear-gradient(180deg, #d1d5db 0%, #e5e7eb 100%);
+            margin: 0 auto;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        .skill-line.unlocked {
+            background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .skill-branch-line {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: #d1d5db;
+            transform-origin: left center;
+        }
+        .skill-branch-line.unlocked {
+            background: #3b82f6;
+        }
+        .btn-primary {
+            background: #3b82f6;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-secondary {
+            background: #6b7280;
+        }
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+            font-weight: 600;
+        }
+        .badge-yellow {
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+        }
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        .badge-purple {
+            background: #ede9fe;
+            color: #5b21b6;
+            font-weight: 600;
+        }
+        .badge-gray {
+            background: #f3f4f6;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        /* 반응형 탭 네비게이션 */
+        .tab-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+        .tab-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        .tab-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        .tab-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .tab-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* 테이블 반응형 */
+        @media (max-width: 768px) {
+            .skill-node {
+                width: 60px;
+                height: 60px;
+            }
+            .skill-node.ultimate {
+                width: 80px;
+                height: 80px;
+            }
+            .skill-line {
+                height: 30px;
+            }
+        }
+
+        /* 카드 호버 효과 강화 */
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .stat-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* 버튼 호버 효과 */
+        .edit-btn, .delete-btn, button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .edit-btn:active, .delete-btn:active, button:active {
+            transform: scale(0.95);
+        }
+
+        /* 테이블 행 애니메이션 */
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        /* 사이드바 스타일 */
+        .sidebar {
+            width: 200px;
+            background: #e5e7eb;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 0;
+        }
+
+        .sidebar-item {
+            padding: 18px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #d1d5db;
+            user-select: none;
+        }
+
+        .sidebar-item:first-child {
+            background: #d1d5db;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .sidebar-item:not(:first-child):hover {
+            background: #d1d5db;
+            color: #1f2937;
+            transform: translateX(2px);
+        }
+
+        .sidebar-item:not(:first-child):active {
+            transform: translateX(0);
+            background: #c4c8cc;
+        }
+
+        .sidebar-sub-menu {
+            display: none;
+            background: #f3f4f6;
+        }
+
+        .sidebar-sub-menu.active {
+            display: block;
+        }
+
+        .sidebar-sub-item {
+            padding: 14px 0 14px 30px;
+            font-size: 14px;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #e5e7eb;
+            user-select: none;
+        }
+
+        .sidebar-sub-item:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+            padding-left: 35px;
+        }
+
+        .sidebar-sub-item:active {
+            background: #d1d5db;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="sidebar-item" onclick="location.href='index.html'" style="cursor: pointer;">Admin</div>
+        <div class="sidebar-item" onclick="location.href='account.html'">계정조회</div>
+        <div class="sidebar-item" onclick="toggleContentMenu()">콘텐츠 관리 <span id="contentArrow">▼</span></div>
+        <div class="sidebar-sub-menu" id="contentSubMenu">
+            <div class="sidebar-sub-item" onclick="location.href='dungeon.html'">던전</div>
+            <div class="sidebar-sub-item" onclick="location.href='arena.html'">투기장</div>
+        </div>
+        <div class="sidebar-item" onclick="location.href='community.html'">커뮤니티</div>
+        <div class="sidebar-item" onclick="location.href='notice.html'">공지사항</div>
+        <div class="sidebar-item" onclick="location.href='mail.html'">메일</div>
+        <div class="sidebar-item" onclick="toggleServiceMenu()">서비스관리 <span id="serviceArrow">▼</span></div>
+        <div class="sidebar-sub-menu" id="serviceSubMenu">
+            <div class="sidebar-sub-item" onclick="location.href='server.html'">서버 관리</div>
+            <div class="sidebar-sub-item" onclick="location.href='sanction.html'">제재 관리</div>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+    <div class="max-w-7xl mx-auto">
+        <!-- Search Section -->
+        <div class="glass-effect rounded-2xl p-6 mb-6 shadow-2xl">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div class="md:col-span-3">
+                    <label class="block text-white text-sm font-semibold mb-2">조회기준</label>
+                    <select id="searchCriteria" class="w-full px-4 py-3 rounded-lg text-white border border-white/30 font-medium">
+                        <option>선택</option>
+                        <option>캐릭터명</option>
+                        <option>캐릭터 ID</option>
+                    </select>
+                </div>
+                
+                <div class="md:col-span-7">
+                    <label class="block text-white text-sm font-semibold mb-2">검색</label>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="검색어를 입력하세요..."
+                        class="w-full px-4 py-3 rounded-lg text-white border border-white/30 placeholder-white/50"
+                    />
+                </div>
+                
+                <div class="md:col-span-2 flex items-end">
+                    <button onclick="searchAccount()" class="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-bold hover:from-pink-600 hover:to-rose-600 transition-all duration-300 shadow-lg hover:shadow-pink-500/50">
+                        검색
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guild List Table -->
+        <div class="glass-effect rounded-lg overflow-hidden mb-6">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="px-6 py-3 text-left text-gray-700 font-semibold">&gt;</th>
+                            <th class="px-6 py-3 text-left text-gray-700 font-semibold">월드 ID</th>
+                            <th class="px-6 py-3 text-left text-gray-700 font-semibold">길드 이름</th>
+                            <th class="px-6 py-3 text-left text-gray-700 font-semibold">캐릭터 ID</th>
+                            <th class="px-6 py-3 text-left text-gray-700 font-semibold">캐릭터명</th>
+                            <th class="px-6 py-3 text-left text-gray-700 font-semibold">Lv</th>
+                        </tr>
+                    </thead>
+                    <tbody id="guildTableBody">
+                        <!-- Data will be inserted by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detail Section -->
+        <div id="detailSection" class="glass-effect rounded-lg p-6 hidden fade-in">
+            <!-- Tabs -->
+            <div class="tab-container flex gap-2 mb-6 pb-4 border-b border-gray-200" id="subTabs">
+                <!-- Tabs will be inserted by JavaScript -->
+            </div>
+
+            <!-- Data Display -->
+            <div id="dataDisplay" class="fade-in">
+                <!-- Data will be inserted by JavaScript -->
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        const guilds = [
+            { worldId: 'WD001', name: '대박나운', characterId: '111111', characterName: '루피', level: 10 },
+            { worldId: 'WD002', name: '아르니윤', characterId: '111112', characterName: '조로', level: 15 },
+            { worldId: 'WD003', name: '우르카니', characterId: '111113', characterName: '상디', level: 20 }
+        ];
+
+        const tabs = ['캐릭터 정보', '인벤토리', '퀘스트', '스킬', '무브먼트', '업적', '창고', '생활', '운영툴 로그'];
+
+        const characterDetails = {
+            left: [
+                { label: 'Platform', value: 'PS' },
+                { label: 'Platform ID', value: '0001' },
+                { label: '캐릭터 ID', value: '111113' },
+                { label: 'Nick name', value: '우르카니', editable: true },
+                { label: 'Class', value: '총' },
+                { label: 'Level', value: '20' },
+                { label: 'Create', value: '2025-01-01 11:00' },
+                { label: 'Last Login', value: '2025-01-11 11:00' },
+                { label: 'Delet', value: '' }
+            ],
+            right: [
+                { label: 'HP', value: '15000/15000' },
+                { label: '힘', value: '120' },
+                { label: '민첩', value: '200' },
+                { label: '지능', value: '50' },
+                { label: '체력', value: '30' },
+                { label: '획득 스킬 포인트', value: '55', editable: true },
+                { label: '보유 골드', value: '1,480,000', editable: true },
+                { label: 'X, Y, Z', value: '232,852,116' }
+            ]
+        };
+
+        const inventoryData = [
+            { id: 'ITM001', name: '전설의 검', slot: '무기', quantity: 1, grade: 'S', equipped: true },
+            { id: 'ITM002', name: '회복 물약', slot: '소비', quantity: 50, grade: 'C', equipped: false },
+            { id: 'ITM003', name: '마법 방어구', slot: '방어구', quantity: 1, grade: 'A', equipped: true },
+            { id: 'ITM004', name: '신속의 부츠', slot: '신발', quantity: 1, grade: 'B', equipped: false },
+            { id: 'ITM005', name: '마나 포션', slot: '소비', quantity: 30, grade: 'C', equipped: false }
+        ];
+
+        const questData = [
+            { id: 'QST001', name: '드래곤 처치', status: '진행중', progress: '75%', reward: '10,000 골드' },
+            { id: 'QST002', name: '잃어버린 보물 찾기', status: '완료', progress: '100%', reward: '경험치 5000' },
+            { id: 'QST003', name: '마을 주민 도움', status: '대기', progress: '0%', reward: '친화도 +50' }
+        ];
+
+        const skillData = [
+            { grade: 'S', name: '궁극의 일격', level: 5, cooldown: '60초', damage: '5000' },
+            { grade: 'A', name: '연속 베기', level: 8, cooldown: '30초', damage: '2500' },
+            { grade: 'B', name: '방어 태세', level: 7, cooldown: '45초', damage: '-' },
+            { grade: 'A', name: '치명타', level: 6, cooldown: '20초', damage: '3000' }
+        ];
+
+        const movementSkillData = [
+            { grade: 'A', name: '전력 질주', level: 10, cooldown: '20초', effect: '이동속도 +50%' },
+            { grade: 'B', name: '회피', level: 8, cooldown: '15초', effect: '짧은 거리 순간이동' },
+            { grade: 'S', name: '텔레포트', level: 5, cooldown: '90초', effect: '긴 거리 이동' },
+            { grade: 'A', name: '점프 강화', level: 7, cooldown: '패시브', effect: '점프력 +30%' }
+        ];
+
+        // 스킬 트리 데이터
+        const skillTreeData = {
+            totalPoints: 50,
+            usedPoints: 28,
+            skills: [
+                // 1단계
+                { id: 1, name: '기본 공격', tier: 1, position: 'center', unlocked: true, level: 5, maxLevel: 5, cost: 1, type: 'normal' },
+                // 2단계
+                { id: 2, name: '강타', tier: 2, position: 'center', unlocked: true, level: 3, maxLevel: 5, cost: 1, type: 'normal' },
+                // 3단계 - 갈림길
+                { id: 3, name: '화염 베기', tier: 3, position: 'left', unlocked: true, level: 5, maxLevel: 5, cost: 2, type: 'branch' },
+                { id: 4, name: '냉기 베기', tier: 3, position: 'right', unlocked: false, level: 0, maxLevel: 5, cost: 2, type: 'branch' },
+                // 4단계
+                { id: 5, name: '연속 공격', tier: 4, position: 'center', unlocked: true, level: 4, maxLevel: 5, cost: 2, type: 'normal' },
+                // 5단계
+                { id: 6, name: '회전 베기', tier: 5, position: 'center', unlocked: true, level: 3, maxLevel: 5, cost: 2, type: 'normal' },
+                // 6단계 - 갈림길
+                { id: 7, name: '폭발 일격', tier: 6, position: 'left', unlocked: false, level: 0, maxLevel: 5, cost: 3, type: 'branch' },
+                { id: 8, name: '관통 일격', tier: 6, position: 'right', unlocked: true, level: 3, maxLevel: 5, cost: 3, type: 'branch' },
+                // 7단계
+                { id: 9, name: '광역 공격', tier: 7, position: 'center', unlocked: true, level: 2, maxLevel: 5, cost: 3, type: 'normal' },
+                // 8단계
+                { id: 10, name: '치명타 강화', tier: 8, position: 'center', unlocked: true, level: 3, maxLevel: 5, cost: 3, type: 'normal' },
+                // 9단계 - 갈림길
+                { id: 11, name: '버서커 모드', tier: 9, position: 'left', unlocked: false, level: 0, maxLevel: 3, cost: 5, type: 'branch' },
+                { id: 12, name: '정밀 타격', tier: 9, position: 'right', unlocked: false, level: 0, maxLevel: 3, cost: 5, type: 'branch' },
+                // 10단계 - 궁극기
+                { id: 13, name: '궁극의 일격', tier: 10, position: 'center', unlocked: false, level: 0, maxLevel: 1, cost: 10, type: 'ultimate' }
+            ]
+        };
+
+        const movementData = [
+            { time: '2025-01-11 14:30:25', zone: '엘프 숲', position: 'X: 125.5, Y: 200.3, Z: 45.7', action: '이동' },
+            { time: '2025-01-11 14:25:10', zone: '던전 입구', position: 'X: 98.2, Y: 150.7, Z: 30.1', action: '전투' },
+            { time: '2025-01-11 14:20:05', zone: '마을 광장', position: 'X: 50.0, Y: 100.0, Z: 10.0', action: 'NPC 대화' },
+            { time: '2025-01-11 14:15:00', zone: '상점가', position: 'X: 75.3, Y: 120.5, Z: 15.2', action: '아이템 구매' }
+        ];
+
+        const achievementData = [
+            { id: 'ACH001', name: '첫 걸음', description: '캐릭터 생성', status: '완료', date: '2025-01-01', reward: '칭호: 초보 모험가' },
+            { id: 'ACH002', name: '전투의 달인', description: '100회 전투 승리', status: '완료', date: '2025-01-05', reward: '스킬 포인트 +5' },
+            { id: 'ACH003', name: '부자의 길', description: '100만 골드 획득', status: '진행중', date: '-', reward: '칭호: 재벌' },
+            { id: 'ACH004', name: '탐험가', description: '모든 지역 방문', status: '진행중', date: '-', reward: '이동속도 +10%' }
+        ];
+
+        const warehouseData = [
+            { id: 'WH001', name: '희귀 광석', category: '재료', quantity: 150, storage: '1번 창고' },
+            { id: 'WH002', name: '강화 주문서', category: '소비', quantity: 25, storage: '1번 창고' },
+            { id: 'WH003', name: '전설의 갑옷', category: '장비', quantity: 1, storage: '2번 창고' },
+            { id: 'WH004', name: '마법 가루', category: '재료', quantity: 500, storage: '1번 창고' },
+            { id: 'WH005', name: '귀환 주문서', category: '소비', quantity: 10, storage: '2번 창고' }
+        ];
+
+        const lifeSkillData = [
+            { skill: '채광', level: 45, exp: '75%', efficiency: '상급', todayGain: '+250 광석' },
+            { skill: '낚시', level: 38, exp: '60%', efficiency: '중급', todayGain: '+120 물고기' },
+            { skill: '요리', level: 52, exp: '85%', efficiency: '고급', todayGain: '+80 요리' },
+            { skill: '제작', level: 41, exp: '40%', efficiency: '중급', todayGain: '+15 아이템' }
+        ];
+
+        const operationLogData = [
+            { time: '2025-01-11 15:00:12', admin: 'GM_Admin01', action: '골드 지급', target: '우르카니', detail: '+50,000 골드', reason: '이벤트 보상' },
+            { time: '2025-01-11 14:55:30', admin: 'GM_Admin02', action: '아이템 회수', target: '우르카니', detail: '버그 아이템 x1', reason: '버그 수정' },
+            { time: '2025-01-11 14:30:45', admin: 'GM_Admin01', action: '경험치 조정', target: '우르카니', detail: '+10,000 EXP', reason: '보상 지급' },
+            { time: '2025-01-11 14:00:20', admin: 'System', action: '계정 확인', target: '우르카니', detail: '정상 로그인', reason: '자동 로그' }
+        ];
+
+        let selectedGuildId = null;
+        let currentTab = '캐릭터 정보';
+
+        // 각 캐릭터별 데이터 저장
+        const charactersData = {
+            'WD001': {
+                nickname: '루피',
+                level: '10',
+                characterId: '111111',
+                class: '전사'
+            },
+            'WD002': {
+                nickname: '조로',
+                level: '15',
+                characterId: '111112',
+                class: '검사'
+            },
+            'WD003': {
+                nickname: '상디',
+                level: '20',
+                characterId: '111113',
+                class: '총'
+            }
+        };
+
+        function updateCharacterData(worldId) {
+            const charData = charactersData[worldId];
+            if (charData) {
+                // 기본 정보 업데이트
+                characterDetails.left[2].value = charData.characterId;
+                characterDetails.left[3].value = charData.nickname;
+                characterDetails.left[4].value = charData.class;
+                characterDetails.left[5].value = charData.level;
+            }
+        }
+
+        function init() {
+            renderGuildTable();
+        }
+
+        function renderGuildTable() {
+            const tbody = document.getElementById('guildTableBody');
+            tbody.innerHTML = guilds.map(guild => {
+                const isExpanded = selectedGuildId === guild.worldId;
+                const arrow = isExpanded ? '▼' : '>';
+                const text = isExpanded ? '접기' : '펼치기';
+                return `
+                <tr onclick="selectGuild('${guild.worldId}')" id="row-${guild.worldId}" class="cursor-pointer transition-all duration-200 border-b border-gray-100">
+                    <td class="px-6 py-4 text-blue-600 font-bold text-lg">
+                        <span id="arrow-${guild.worldId}">${arrow}</span>
+                        <span class="text-sm ml-1">(${text})</span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-800 font-mono">${guild.worldId}</td>
+                    <td class="px-6 py-4 text-gray-800 font-semibold">${guild.name}</td>
+                    <td class="px-6 py-4 text-gray-600 font-mono">${guild.characterId}</td>
+                    <td class="px-6 py-4 text-gray-800">${guild.characterName}</td>
+                    <td class="px-6 py-4 text-blue-600 font-bold text-lg">${guild.level}</td>
+                </tr>
+            `}).join('');
+        }
+
+        function selectGuild(worldId) {
+            const detailSection = document.getElementById('detailSection');
+
+            // 같은 캐릭터를 다시 클릭하면 접기
+            if (selectedGuildId === worldId) {
+                selectedGuildId = null;
+                detailSection.classList.add('hidden');
+                renderGuildTable(); // 테이블 다시 렌더링하여 화살표 업데이트
+                return;
+            }
+
+            // 다른 캐릭터 선택
+            selectedGuildId = worldId;
+
+            // 선택한 캐릭터의 정보로 업데이트
+            updateCharacterData(worldId);
+
+            detailSection.classList.remove('hidden');
+            renderGuildTable(); // 테이블 다시 렌더링하여 화살표 업데이트
+            renderTabs();
+            renderContent();
+
+            // 선택된 행에 스타일 적용
+            setTimeout(() => {
+                document.querySelectorAll('tbody tr').forEach(row => {
+                    row.classList.remove('selected-row');
+                });
+                document.getElementById(`row-${worldId}`).classList.add('selected-row');
+            }, 0);
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('subTabs');
+            container.innerHTML = tabs.map((tab, index) => `
+                <button
+                    onclick="selectTab('${tab}')"
+                    class="${currentTab === tab ? 'tab-active' : 'bg-gray-100'} px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 ${currentTab === tab ? 'text-white' : 'text-gray-700 hover:bg-gray-200'} whitespace-nowrap"
+                >
+                    ${tab}
+                </button>
+            `).join('');
+        }
+
+        function selectTab(tab) {
+            currentTab = tab;
+            renderTabs();
+            renderContent();
+        }
+
+        function renderContent() {
+            const container = document.getElementById('dataDisplay');
+            
+            if (currentTab === '캐릭터 정보') {
+                container.innerHTML = renderCharacterInfo();
+            } else if (currentTab === '인벤토리') {
+                container.innerHTML = renderInventory();
+            } else if (currentTab === '퀘스트') {
+                container.innerHTML = renderQuest();
+            } else if (currentTab === '스킬') {
+                container.innerHTML = renderSkillTree();
+            } else if (currentTab === '무브먼트') {
+                container.innerHTML = renderMovementSkill();
+            } else if (currentTab === '업적') {
+                container.innerHTML = renderAchievement();
+            } else if (currentTab === '창고') {
+                container.innerHTML = renderWarehouse();
+            } else if (currentTab === '생활') {
+                container.innerHTML = renderLifeSkill();
+            } else if (currentTab === '운영툴 로그') {
+                container.innerHTML = renderOperationLog();
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-white/50 text-lg mb-4">🚧 개발 중인 기능입니다</div>
+                        <div class="text-white/30 text-sm">${currentTab} 메뉴는 준비 중입니다.</div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderCharacterInfo() {
+            const leftPanel = `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">기본 정보</h3>
+                    <div class="space-y-3">
+                        ${characterDetails.left.map(item => {
+                            if (item.label === 'Delet') {
+                                return `
+                                    <button onclick="deleteCharacter()" class="w-full mt-4 px-4 py-3 delete-btn text-white rounded-lg font-bold transition-all duration-200">
+                                        삭제
+                                    </button>
+                                `;
+                            }
+                            return `
+                                <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+                                    <span class="w-32 text-gray-600 font-medium text-sm">${item.label}</span>
+                                    <span class="flex-1 text-gray-800 font-semibold">${item.value}</span>
+                                    ${item.editable ? `<button onclick="editField('${item.label}')" class="edit-btn text-white ml-2">수정</button>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+
+            const rightPanel = `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">스탯 정보</h3>
+                    <div class="space-y-3">
+                        ${characterDetails.right.map(item => `
+                            <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+                                <span class="w-40 text-gray-600 font-medium text-sm">${item.label}</span>
+                                <span class="flex-1 text-gray-800 font-semibold">${item.value}</span>
+                                ${item.editable ? `<button onclick="editField('${item.label}')" class="edit-btn text-white ml-2">수정</button>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            return `<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">${leftPanel}${rightPanel}</div>`;
+        }
+
+        function renderInventory() {
+            return `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">인벤토리 목록</h3>
+                    <div class="space-y-2">
+                        ${inventoryData.map(item => {
+                            const isEquipment = ['무기', '방어구', '신발', '장갑', '투구', '반지', '목걸이'].includes(item.slot);
+                            return `
+                            <div class="item-row ${item.equipped ? 'equipped' : ''} flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-800 font-semibold">${item.name}</span>
+                                        ${item.equipped ? '<span class="px-2 py-1 bg-blue-500 text-white text-xs rounded font-bold">착용중</span>' : ''}
+                                    </div>
+                                    <div class="text-gray-500 text-xs">${item.id} | ${item.slot} | 등급: ${item.grade}</div>
+                                </div>
+                                <div class="text-gray-800 font-bold mr-4">x${item.quantity}</div>
+                                <div class="flex gap-2">
+                                    ${isEquipment ? `<button onclick="toggleEquip('${item.id}')" class="px-3 py-1 ${item.equipped ? 'bg-gray-500 hover:bg-gray-600' : 'bg-green-500 hover:bg-green-600'} text-white rounded text-sm font-semibold">${item.equipped ? '해제' : '착용'}</button>` : ''}
+                                    <button onclick="editItem('${item.id}')" class="edit-btn text-white">수정</button>
+                                    <button onclick="deleteItem('${item.id}')" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm">삭제</button>
+                                </div>
+                            </div>
+                        `}).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuest() {
+            return `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">퀘스트 목록</h3>
+                    <div class="space-y-2">
+                        ${questData.map(quest => `
+                            <div class="item-row">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-gray-800 font-semibold">${quest.name}</div>
+                                    <span class="px-3 py-1 rounded text-xs font-bold ${
+                                        quest.status === '완료' ? 'badge-green' :
+                                        quest.status === '진행중' ? 'badge-yellow' :
+                                        'badge-gray'
+                                    }">${quest.status}</span>
+                                </div>
+                                <div class="text-gray-500 text-xs mb-1">${quest.id}</div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600">진행도: ${quest.progress}</span>
+                                    <span class="text-blue-600">보상: ${quest.reward}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSkill() {
+            return `
+                <div class="stat-card rounded-xl p-6">
+                    <h3 class="text-white font-bold text-xl mb-4 pb-3 border-b border-white/20">스킬 목록</h3>
+                    <div class="space-y-2">
+                        ${skillData.map(skill => `
+                            <div class="item-row">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <span class="px-2 py-1 rounded text-xs font-bold ${
+                                            skill.grade === 'S' ? 'bg-yellow-500/30 text-yellow-300' :
+                                            skill.grade === 'A' ? 'bg-purple-500/30 text-purple-300' :
+                                            'bg-blue-500/30 text-blue-300'
+                                        } mr-2">${skill.grade}</span>
+                                        <span class="text-white font-semibold">${skill.name}</span>
+                                    </div>
+                                    <span class="text-cyan-300 font-bold">Lv.${skill.level}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm text-white/70">
+                                    <span>쿨타임: ${skill.cooldown}</span>
+                                    <span>피해량: ${skill.damage}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSkillTree() {
+            const remainingPoints = skillTreeData.totalPoints - skillTreeData.usedPoints;
+            
+            let skillTreeHTML = `
+                <div class="stat-card rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                        <h3 class="text-gray-800 font-bold text-xl">스킬 트리</h3>
+                        <div class="flex gap-4">
+                            <div class="text-right">
+                                <div class="text-gray-600 text-sm">사용 포인트</div>
+                                <div class="text-blue-600 font-bold text-lg">${skillTreeData.usedPoints} / ${skillTreeData.totalPoints}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-gray-600 text-sm">남은 포인트</div>
+                                <div class="text-orange-500 font-bold text-lg">${remainingPoints}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto pb-4">
+                        <div class="flex flex-col items-center min-w-max py-4">
+            `;
+            
+            // 티어별로 스킬 그룹화
+            const tierGroups = {};
+            skillTreeData.skills.forEach(skill => {
+                if (!tierGroups[skill.tier]) tierGroups[skill.tier] = [];
+                tierGroups[skill.tier].push(skill);
+            });
+            
+            // 각 티어별로 렌더링
+            Object.keys(tierGroups).sort((a, b) => a - b).forEach(tier => {
+                const skills = tierGroups[tier];
+                
+                // 연결선
+                if (tier > 1) {
+                    skillTreeHTML += `<div class="skill-line ${skills.some(s => s.unlocked) ? 'unlocked' : ''}"></div>`;
+                }
+                
+                // 스킬 노드들
+                skillTreeHTML += `<div class="flex items-center justify-center gap-8 my-2">`;
+                
+                if (skills.length === 1) {
+                    const skill = skills[0];
+                    skillTreeHTML += `
+                        <div onclick="toggleSkill(${skill.id})" class="skill-node ${skill.unlocked ? 'unlocked' : 'locked'} ${skill.type === 'ultimate' ? 'ultimate' : ''}" title="${skill.name}">
+                            <div class="text-xs font-bold text-center px-1 ${skill.unlocked ? 'text-white' : 'text-gray-600'}">${skill.name}</div>
+                            <div class="text-xs mt-1 ${skill.unlocked ? 'text-white' : 'text-gray-500'}">Lv ${skill.level}/${skill.maxLevel}</div>
+                            ${skill.unlocked ? '<div class="text-green-300 text-xs">✓</div>' : `<div class="text-gray-500 text-xs">${skill.cost}P</div>`}
+                        </div>
+                    `;
+                } else {
+                    // 갈림길
+                    skills.forEach(skill => {
+                        skillTreeHTML += `
+                            <div onclick="toggleSkill(${skill.id})" class="skill-node ${skill.unlocked ? 'unlocked' : 'locked'}" title="${skill.name}">
+                                <div class="text-xs font-bold text-center px-1 ${skill.unlocked ? 'text-white' : 'text-gray-600'}">${skill.name}</div>
+                                <div class="text-xs mt-1 ${skill.unlocked ? 'text-white' : 'text-gray-500'}">Lv ${skill.level}/${skill.maxLevel}</div>
+                                ${skill.unlocked ? '<div class="text-green-300 text-xs">✓</div>' : `<div class="text-gray-500 text-xs">${skill.cost}P</div>`}
+                            </div>
+                        `;
+                    });
+                }
+                
+                skillTreeHTML += `</div>`;
+            });
+            
+            skillTreeHTML += `
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="text-gray-700 text-sm mb-2 font-semibold">📌 스킬 트리 안내</div>
+                        <div class="text-gray-600 text-xs">
+                            • 활성화된 스킬은 파란색으로 표시됩니다<br>
+                            • 3단계마다 갈림길에서 하나를 선택할 수 있습니다<br>
+                            • 스킬을 클릭하여 포인트를 투자하세요
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return skillTreeHTML;
+        }
+
+        function renderMovementSkill() {
+            return `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">무브먼트 스킬</h3>
+                    <div class="space-y-2">
+                        ${movementSkillData.map(skill => `
+                            <div class="item-row">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <span class="px-2 py-1 rounded text-xs font-bold ${
+                                            skill.grade === 'S' ? 'badge-yellow' :
+                                            skill.grade === 'A' ? 'badge-purple' :
+                                            'badge-blue'
+                                        } mr-2">${skill.grade}</span>
+                                        <span class="text-gray-800 font-semibold">${skill.name}</span>
+                                    </div>
+                                    <span class="text-blue-600 font-bold">Lv.${skill.level}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm text-gray-600">
+                                    <span>쿨타임: ${skill.cooldown}</span>
+                                    <span>효과: ${skill.effect}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMovement() {
+            return `
+                <div class="stat-card rounded-xl p-6">
+                    <h3 class="text-white font-bold text-xl mb-4 pb-3 border-b border-white/20">이동 기록</h3>
+                    <div class="space-y-2">
+                        ${movementData.map(move => `
+                            <div class="item-row">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-white font-semibold">${move.zone}</div>
+                                    <span class="px-2 py-1 rounded text-xs font-bold bg-cyan-500/30 text-cyan-300">${move.action}</span>
+                                </div>
+                                <div class="text-white/50 text-xs mb-1">${move.time}</div>
+                                <div class="text-white/70 text-sm">${move.position}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAchievement() {
+            return `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">업적 목록</h3>
+                    <div class="space-y-2">
+                        ${achievementData.map(ach => `
+                            <div class="item-row">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-gray-800 font-semibold">${ach.name}</div>
+                                    <span class="px-3 py-1 rounded text-xs font-bold ${
+                                        ach.status === '완료' ? 'badge-green' : 'badge-yellow'
+                                    }">${ach.status}</span>
+                                </div>
+                                <div class="text-gray-500 text-xs mb-1">${ach.id} | ${ach.description}</div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600">달성일: ${ach.date}</span>
+                                    <span class="text-blue-600">보상: ${ach.reward}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderWarehouse() {
+            return `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">창고 목록</h3>
+                    <div class="space-y-2">
+                        ${warehouseData.map(item => `
+                            <div class="item-row flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-gray-800 font-semibold">${item.name}</div>
+                                    <div class="text-gray-500 text-xs">${item.id} | ${item.category} | ${item.storage}</div>
+                                </div>
+                                <div class="text-gray-800 font-bold mr-4">x${item.quantity}</div>
+                                <div class="flex gap-2">
+                                    <button onclick="editWarehouse('${item.id}')" class="edit-btn text-white">수정</button>
+                                    <button onclick="deleteWarehouse('${item.id}')" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm">삭제</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLifeSkill() {
+            return `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">생활 스킬</h3>
+                    <div class="space-y-2">
+                        ${lifeSkillData.map(skill => `
+                            <div class="item-row">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-gray-800 font-semibold">${skill.skill}</div>
+                                    <span class="text-blue-600 font-bold">Lv.${skill.level}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm mb-1">
+                                    <span class="text-gray-600">경험치: ${skill.exp}</span>
+                                    <span class="px-2 py-1 rounded text-xs font-bold ${
+                                        skill.efficiency === '고급' ? 'badge-purple' :
+                                        skill.efficiency === '상급' ? 'badge-blue' :
+                                        'badge-green'
+                                    }">${skill.efficiency}</span>
+                                </div>
+                                <div class="text-gray-600 text-sm">오늘 획득: ${skill.todayGain}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOperationLog() {
+            return `
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-gray-800 font-bold text-xl mb-4 pb-3 border-b border-gray-200">운영 로그</h3>
+                    <div class="space-y-2">
+                        ${operationLogData.map(log => `
+                            <div class="item-row">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-gray-800 font-semibold">${log.action}</div>
+                                    <span class="text-blue-600 text-xs">${log.admin}</span>
+                                </div>
+                                <div class="text-gray-500 text-xs mb-1">${log.time} | 대상: ${log.target}</div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600">${log.detail}</span>
+                                    <span class="text-blue-600 text-xs">${log.reason}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function searchAccount() {
+            const criteria = document.getElementById('searchCriteria').value;
+            const query = document.getElementById('searchInput').value;
+            alert(`검색 조건: ${criteria}\n검색어: ${query}`);
+        }
+
+        function deleteCharacter() {
+            if (confirm('이 캐릭터를 삭제하시겠습니까?')) {
+                alert('캐릭터가 삭제되었습니다.');
+            }
+        }
+
+        function editField(fieldName) {
+            const newValue = prompt(`${fieldName}의 새로운 값을 입력하세요:`);
+            if (newValue !== null) {
+                alert(`${fieldName}이(가) "${newValue}"(으)로 수정되었습니다.`);
+            }
+        }
+
+        function deleteItem(itemId) {
+            if (confirm('이 아이템을 삭제하시겠습니까?')) {
+                alert(`아이템 ${itemId}이(가) 삭제되었습니다.`);
+            }
+        }
+
+        function editItem(itemId) {
+            const item = inventoryData.find(i => i.id === itemId);
+            if (item) {
+                const newQuantity = prompt(`${item.name}의 수량을 수정하세요 (현재: ${item.quantity}):`);
+                if (newQuantity !== null && !isNaN(newQuantity)) {
+                    alert(`${item.name}의 수량이 ${newQuantity}개로 수정되었습니다.`);
+                    // 실제로는 여기서 데이터를 업데이트하고 화면을 다시 렌더링
+                }
+            }
+        }
+
+        function editWarehouse(itemId) {
+            const item = warehouseData.find(i => i.id === itemId);
+            if (item) {
+                const newQuantity = prompt(`${item.name}의 수량을 수정하세요 (현재: ${item.quantity}):`);
+                if (newQuantity !== null && !isNaN(newQuantity)) {
+                    alert(`${item.name}의 수량이 ${newQuantity}개로 수정되었습니다.`);
+                }
+            }
+        }
+
+        function deleteWarehouse(itemId) {
+            if (confirm('이 아이템을 창고에서 삭제하시겠습니까?')) {
+                alert(`아이템 ${itemId}이(가) 창고에서 삭제되었습니다.`);
+            }
+        }
+
+        function toggleSkill(skillId) {
+            const skill = skillTreeData.skills.find(s => s.id === skillId);
+            if (!skill) return;
+            
+            if (skill.unlocked) {
+                if (skill.level < skill.maxLevel) {
+                    const cost = skill.cost;
+                    const remainingPoints = skillTreeData.totalPoints - skillTreeData.usedPoints;
+                    
+                    if (remainingPoints >= cost) {
+                        if (confirm(`${skill.name}을(를) 레벨업 하시겠습니까? (필요 포인트: ${cost})`)) {
+                            skill.level++;
+                            skillTreeData.usedPoints += cost;
+                            renderContent();
+                            alert(`${skill.name}이(가) Lv.${skill.level}(으)로 올랐습니다!`);
+                        }
+                    } else {
+                        alert('스킬 포인트가 부족합니다!');
+                    }
+                } else {
+                    alert('이미 최대 레벨입니다!');
+                }
+            } else {
+                const cost = skill.cost;
+                const remainingPoints = skillTreeData.totalPoints - skillTreeData.usedPoints;
+                
+                if (remainingPoints >= cost) {
+                    if (confirm(`${skill.name}을(를) 활성화하시겠습니까? (필요 포인트: ${cost})`)) {
+                        // 갈림길의 경우 다른 선택지 비활성화 체크
+                        if (skill.type === 'branch') {
+                            const sameTierSkills = skillTreeData.skills.filter(s => s.tier === skill.tier && s.id !== skill.id);
+                            const otherBranchUnlocked = sameTierSkills.some(s => s.unlocked);
+                            
+                            if (otherBranchUnlocked) {
+                                alert('이미 다른 갈림길 스킬을 선택했습니다!');
+                                return;
+                            }
+                        }
+                        
+                        skill.unlocked = true;
+                        skill.level = 1;
+                        skillTreeData.usedPoints += cost;
+                        renderContent();
+                        alert(`${skill.name}이(가) 활성화되었습니다!`);
+                    }
+                } else {
+                    alert('스킬 포인트가 부족합니다!');
+                }
+            }
+        }
+
+        function toggleEquip(itemId) {
+            const item = inventoryData.find(i => i.id === itemId);
+            if (item) {
+                item.equipped = !item.equipped;
+                renderContent();
+                alert(`${item.name}을(를) ${item.equipped ? '착용' : '해제'}했습니다.`);
+            }
+        }
+
+        // 콘텐츠 관리 메뉴 토글
+        function toggleContentMenu() {
+            const subMenu = document.getElementById('contentSubMenu');
+            const arrow = document.getElementById('contentArrow');
+
+            if (subMenu.classList.contains('active')) {
+                subMenu.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                subMenu.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+
+        // 서비스 관리 메뉴 토글
+        function toggleServiceMenu() {
+            const subMenu = document.getElementById('serviceSubMenu');
+            const arrow = document.getElementById('serviceArrow');
+
+            if (subMenu.classList.contains('active')) {
+                subMenu.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                subMenu.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
